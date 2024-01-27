@@ -5,16 +5,26 @@ from statistics import mean, stdev
 Temps = []
 Tension = []
 
-data1 = np.genfromtxt('F0001CH2_128.csv', delimiter=',')
+Temps_2 = []
+Tension_2 = []
+
+data1 = np.genfromtxt('F0001CH2_128.csv', delimiter=',')#data moyenné 128x par oscilloscope
+data2 = np.genfromtxt('F0000CH2.csv', delimiter=',')#data pas moyenné par oscilloscope
 #print(data1)
 
 for couple in data1:
     Temps.append(couple[0])
     Tension.append(couple[1])
 
+for couple in data2:
+    Temps_2.append(couple[0]+0.025)
+    Tension_2.append(couple[1]+0.08)
+
+
 
 high = []
 low = []
+
 # Séparer les deux états (SYNC LOW, SYNC HIGH) en listes (on ne prend que les temps)
 for couple in data1:
     if couple[1] > 3.35:
@@ -23,10 +33,11 @@ for couple in data1:
     elif couple[1] < 3.34:
         low.append(couple[0])
 
-#Afficher le graphique
-mpl.plot(Temps, Tension)
-#mpl.xlabel('Temps(s)')      # titre des abscisses
-#mpl.ylabel('Tension(V)')      # titre des ordonnées
+mpl.plot(Temps_2, Tension_2, label = 'Pas moyenné')#Afficher le graphique
+mpl.plot(Temps, Tension, label = 'Moyenne de 128 expériences')
+
+mpl.xlabel('Temps(s)')      # titre des abscisses
+mpl.ylabel('Tension(V)')      # titre des ordonnées
 #mpl.show()
         
 # Trouver l'intervalle de temps qui explicite le début et la fin d'un même SYNC
@@ -62,7 +73,7 @@ def find_index(list_inter):
     return index_inter
 indice_high = find_index(interhigh)
 indice_low = find_index(interlow)
-print(indice_low)
+#print(indice_low)
 ### Ici on moyenne le bruit/on moyenne chaque expérience et on fait la moyenne, on va essayer de le réduire en l'annulant en l'additionnant 
 # On calcule la moyenne des valeurs avec les indices des temps trouvés avec la fonctione intervalle et find_index
 def moyenneSYNC(list_inter):
@@ -141,7 +152,7 @@ for inter in indice_low_formattée:
   tension_low.append(Tension[inter[0]: inter[1]])
   
 
-#On fait la moyenne de toutes les expériences actives SYNCH High,
+#On additionne chaque expérience actives SYNCH High,
 Moyenne_high = []
 Points_high = []
 
@@ -151,7 +162,7 @@ for i in range(49):
     Moyenne_high.append(sum(Points_high)/len(Points_high))
     Points_high=[]
 
-#On fait la moyenne de toutes les background SYNCH Low,
+#On additionne chaque background SYNCH Low,
 Moyenne_low = []
 Points_low = []
 
@@ -161,10 +172,28 @@ for i in range(49):
     Moyenne_low.append(sum(Points_low)/len(Points_low))
     Points_low=[]
 
-mpl.plot(np.arange(interhigh[0][0],interhigh[0][1], 0.002), Moyenne_high)
-mpl.plot(np.arange(interlow[1][0],interlow[1][1], 0.002), Moyenne_low)
+#Graphique qui montre la diminution du bruit
+mpl.plot(np.arange(interhigh[0][0],interhigh[0][1], 0.002), Moyenne_high, color = 'red', label = 'Moyenne des 25 moyennes de 128 expériences')
+mpl.plot(np.arange(interlow[1][0],interlow[1][1], 0.002), Moyenne_low, color = 'red')
+mpl.legend(loc = 'lower left', fontsize="x-small")
 mpl.show()
 
-Signal = np.array(Moyenne_high) - np.array(Moyenne_low)
 
-Signal_moyen = mean(Moyenne_high)-mean(Moyenne_low)
+#On calcule différence (en %) entre le background et le signal avec les signaux moins bruités pour avoir une meilleure précision
+Signal_moyen = (mean(Moyenne_high)-mean(Moyenne_low))/mean(Moyenne_low)*100
+#print(Signal_moyen)
+
+#On cherche le ratio signal sur bruit en fonction du nombre d'expérience dont nous ferons la moyenne
+def SON(n, list_index):
+    list_nos = []
+    for index in list_index[0:n]:
+        list_nos.append(mean(Tension[index[0]: index[1]])/stdev(Tension[index[0]: index[1]]))
+    return mean(list_nos)
+
+ratios = []
+for n in range(1, 26):
+    ratios.append(SON(n,indice_high_formattée))
+
+#mpl.plot([128 * i for i in range(1, 26)], ratios)
+#mpl.show()
+
