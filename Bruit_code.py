@@ -33,11 +33,10 @@ for couple in data1:
     elif couple[1] < 3.34:
         low.append(couple[0])
 
-mpl.plot(Temps_2, Tension_2, label = 'Pas moyenné')#Afficher le graphique
-mpl.plot(Temps, Tension, label = 'Moyenne de 128 expériences')
+# mpl.plot(Temps_2, Tension_2, label = 'Pas moyenné')#Afficher le graphique
+# mpl.plot(Temps, Tension, label = 'Moyenne de 128 expériences')
 
-mpl.xlabel('Temps(s)')      # titre des abscisses
-mpl.ylabel('Tension(V)')      # titre des ordonnées
+     # titre des ordonnées
 #mpl.show()
         
 # Trouver l'intervalle de temps qui explicite le début et la fin d'un même SYNC
@@ -119,81 +118,71 @@ incertitude_low1 = incertitude(interlow)
 
 
 ### On va additionner les expériences entre elles pour diminuer le bruit
-#Les expériences ne sont pas de la même longueur, on formatte pour avoit toutes les mêmes longueurs
-def min_len_listoflist(inter_list):
-    min = 100
-    index_list = find_index(inter_list)
+#Les expériences ne sont pas de la même longueur, on trouve la longueur du plus petit bloc.
+def min_len_listoflist(index_list):
+    min = 10000
     for inter in index_list:
         if inter[1]-inter[0] < min:
             min = inter[1]-inter[0]
     return min
 
-#Pour les high, l'intervalle min est de 48, on définit la liste interhigh_formattée pour avoir uniquement des intervalles de 48
-indice_high_formattée =[]
-for inter in indice_high:
-    début, fin = inter[0], inter[0]+ min_len_listoflist(interhigh)+1
-    indice_high_formattée.append([début, fin])
+# On formatte les blocs indices pour qu'ils soient tous de la longueur du plus petit bloc.
+def cut_blocs(index_list):
+    format_index =[]
+    inter_len_min = min_len_listoflist(index_list)
+    for inter in index_list:
+        début, fin = inter[0], inter[0]+inter_len_min
+        format_index.append([début, fin])
+    return format_index
+    
 
-#Pour les low, on coupe enlève ceux qui sont plus petit que 48 
-indice_low_formattée =[]
-for inter in indice_low:
-    if inter[1]-inter[0] >=  min_len_listoflist(interhigh):
-        début, fin = inter[0], inter[0]+ min_len_listoflist(interhigh)+1
-        indice_low_formattée.append([début, fin])
+#On moyenne n expériences en faisant la moyenne de deux listes en les parcourant un élément à la fois
+def add_n_blocs(format_index, n):
+    if len(format_index) < n:
+        n = len(format_index)
+    added_data = Tension[format_index[0][0]: format_index[0][1]]
+    for i, _ in enumerate(added_data):
+        for j in range(1, n):
+            this_bloc = Tension[format_index[j][0]: format_index[j][1]]
+            added_data[i] += this_bloc[i]
+    return added_data
 
-#on fait une liste de Tension High formattée
-tension_high = []
-for inter in indice_high_formattée:
-  tension_high.append(Tension[inter[0]: inter[1]])
 
-##on fait une liste de Tension Low formattée
-tension_low = []
-for inter in indice_low_formattée:
-  tension_low.append(Tension[inter[0]: inter[1]])
-  
+def incert(data):
+    return (max(data)-min(data))/2
 
-#On additionne chaque expérience actives SYNCH High,
-Moyenne_high = []
-Points_high = []
+#On calcule la ratio signal sur bruit de 1 jusqu'à n expérience pour voir la tendance.
+list_of_SoN = []
+error_SoN = []
+cut_high = cut_blocs(indice_high)
+cut_low = cut_blocs(indice_low)
+for exp in range(1, len(cut_high)):
+    added_data_high = add_n_blocs(cut_high, exp)
+    added_data_low = add_n_blocs(cut_low, exp)
+    # mpl.plot(np.arange(0, len(added_data_high)+len(added_data_low)), added_data_high+added_data_low)
+    # mpl.show()
+    delta = mean(added_data_high)-mean(added_data_low)
+    list_of_SoN.append(delta/stdev(added_data_high))
+    error_SoN.append((incert(added_data_low)+incert(added_data_high))/delta*list_of_SoN[-1])
+    background = (mean(added_data_high)-mean(added_data_low))/mean(added_data_low)*100
+    print(background, ((incert(added_data_low)+incert(added_data_high))/delta+incert(added_data_low)/mean(added_data_low))*background)
 
-for i in range(49):
-    for experience in tension_high:
-       Points_high.append(experience[i])
-    Moyenne_high.append(sum(Points_high)/len(Points_high))
-    Points_high=[]
-
-#On additionne chaque background SYNCH Low,
-Moyenne_low = []
-Points_low = []
-
-for i in range(49):
-    for experience in tension_low:
-       Points_low.append(experience[i])
-    Moyenne_low.append(sum(Points_low)/len(Points_low))
-    Points_low=[]
-
-#Graphique qui montre la diminution du bruit
-mpl.plot(np.arange(interhigh[0][0],interhigh[0][1], 0.002), Moyenne_high, color = 'red', label = 'Moyenne des 25 moyennes de 128 expériences')
-mpl.plot(np.arange(interlow[1][0],interlow[1][1], 0.002), Moyenne_low, color = 'red')
-mpl.legend(loc = 'lower left', fontsize="x-small")
+fig, ax = mpl.subplots()
+mpl.plot(np.arange(128, 128*(len(list_of_SoN)+1), 128), list_of_SoN, 'o')
+# mpl.errorbar(np.arange(128, 128*(len(list_of_SoN)+1), 128), list_of_SoN, 'o', yerr =error_SoN)
+mpl.xlabel("""Nombre de mesures moyennées""", fontsize=14)      # titre des abscisses
+mpl.ylabel('Ratio signal sur bruit', fontsize=14) 
+#mpl.text(2000, 15, """La numérisation d'un signal carré a été faite sur un oscilloscope qui moyennait le signal 128 fois. Les différents plateaux du signal numérisé ont été additionés entre eux avec Python pour diminuer le bruit encore plus. Le ratio du point le plus à gauche a été calculé avec un plateau et chaque point est calculé avec un plateau de plus que celui à sa gauche.""")
+props = dict(boxstyle='round', facecolor='grey', alpha=0.5)
+textstr = """La numérisation d'un signal carré a été faite sur un
+oscilloscope qui moyennait le signal 128 fois. Les
+différents plateaux du signal numérisé ont été
+additionés entre eux avec Python pour diminuer le
+bruit encore plus. Le graphique montre le ratio
+signal sur bruit pour l'addition de 1 à 24 plateaux."""
+# place a text box in upper left in axes coords
+mpl.text(0.98, 0.03, textstr, transform=ax.transAxes, fontsize=14,
+        verticalalignment='bottom', horizontalalignment='right', bbox=props)
 mpl.show()
 
-
-#On calcule différence (en %) entre le background et le signal avec les signaux moins bruités pour avoir une meilleure précision
-Signal_moyen = (mean(Moyenne_high)-mean(Moyenne_low))/mean(Moyenne_low)*100
-#print(Signal_moyen)
-
-#On cherche le ratio signal sur bruit en fonction du nombre d'expérience dont nous ferons la moyenne
-def SON(n, list_index):
-    list_nos = []
-    for index in list_index[0:n]:
-        list_nos.append(mean(Tension[index[0]: index[1]])/stdev(Tension[index[0]: index[1]]))
-    return mean(list_nos)
-
-ratios = []
-for n in range(1, 26):
-    ratios.append(SON(n,indice_high_formattée))
-
-#mpl.plot([128 * i for i in range(1, 26)], ratios)
-#mpl.show()
 
