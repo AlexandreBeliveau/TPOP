@@ -53,9 +53,58 @@ Courant_TE = [13.5,
 251
 ]
 
-mpl.plot(Angle, Courant_TM, "o", label = 'Polarisation TM', color = 'blue')
-mpl.plot(Angle, Courant_TE, "o", label = 'Polarisation TE', color = 'red')
-mpl.xlabel("Angle d'incidence (°)")      # titre des abscisses
+#mpl.plot(Angle, Courant_TM, "o", label = 'Polarisation TM', color = 'blue')
+#mpl.plot(Angle, Courant_TE, "o", label = 'Polarisation TE', color = 'red')
+#mpl.xlabel("Angle d'incidence (°)")      # titre des abscisses
+#mpl.ylabel("Courant proportionnel à l'intensité lumineuse (μA)")      # titre des ordonnées
+#mpl.legend()
+#mpl.show()
+
+#D) Vérification de la loi de Malus
+
+Angle = [0,
+10,
+20,
+30,
+40,
+50,
+60,
+70,
+80,
+90,
+100,
+110,
+120,
+130,
+140,
+150,
+160,
+170,
+180
+]
+
+Courant = [186,
+202, 
+206,
+197,
+176,
+146,
+110,
+75,
+44.5,
+19.5,
+4.5,
+1.6,
+12.5,
+31.5,
+60,
+96,
+136,
+168,
+195]
+
+mpl.plot(Angle, Courant, "o")
+mpl.xlabel("Angle du prisme de Glan-Thompson (°)")      # titre des abscisses
 mpl.ylabel("Courant proportionnel à l'intensité lumineuse (μA)")      # titre des ordonnées
 mpl.legend()
 mpl.show()
