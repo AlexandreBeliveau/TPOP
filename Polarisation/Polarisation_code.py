@@ -1,4 +1,7 @@
 import matplotlib.pyplot as mpl
+from math import cos
+import scipy
+import numpy as np
 
 #A) Polarisation par réflexion
 
@@ -103,8 +106,20 @@ Courant = [186,
 168,
 195]
 
-mpl.plot(Angle, Courant, "o")
-mpl.xlabel("Angle du prisme de Glan-Thompson (°)")      # titre des abscisses
-mpl.ylabel("Courant proportionnel à l'intensité lumineuse (μA)")      # titre des ordonnées
+def Malus(theta, I_0, delta_theta):
+    theta_array = np.array(theta)
+    return I_0 * np.cos(np.radians(theta_array - delta_theta))**2
+
+# Courbe de tendance avec décalage
+parametres, covariance = scipy.optimize.curve_fit(Malus, Angle, Courant, p0=[100, 0])  # p0=[100, 0] est un point de départ pour les paramètres
+print(parametres)
+
+mpl.plot(Angle, Courant, "o", label='Données')  # Plot Données
+mpl.plot(Angle, Malus(Angle, *parametres), color='red', label='Courbe de tendance')  # Plot courbe de tendance
+mpl.xlabel("Angle du prisme de Glan-Thompson (°)")  # titre des abscisses
+mpl.ylabel("Courant proportionnel à l'intensité lumineuse (μA)")  # titre des ordonnées
+# Ajout de la boîte de texte
+texte = "I(θ) = 207.80092645 cos^2(θ - 16.89594484) "
+mpl.text(122, max(Courant), texte, bbox=dict(facecolor='white', alpha=0.5), ha='center')
 mpl.legend()
 mpl.show()
