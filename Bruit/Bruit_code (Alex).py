@@ -33,8 +33,8 @@ for couple in data1:
     elif couple[1] < 3.34:
         low.append(couple[0])
 
-mpl.plot(Temps_2, Tension_2, label = 'Pas moyenné')#Afficher le graphique
-mpl.plot(Temps, Tension, label = 'Moyenne de 128 expériences')
+#mpl.plot(Temps_2, Tension_2, label = 'Pas moyenné')#Afficher le graphique
+#mpl.plot(Temps, Tension, label = 'Moyenne de 128 expériences')
 
      # titre des ordonnées
 #mpl.show()
@@ -168,18 +168,17 @@ for exp in range(1, len(cut_high)):
     # print(background, ((incert(added_data_low)+incert(added_data_high))/delta+incert(added_data_low)/mean(added_data_low))*background)
 
 
-mpl.rcParams.update({'font.size': 22})
+mpl.rcParams.update({'font.size': 24})
 fig, ax = mpl.subplots()
-mpl.plot(np.arange(1, 128*(len(list_of_SoN)+1), 128), [86]+list_of_SoN, 'bo')
+mpl.plot(np.arange(128, 128*(len(list_of_SoN)+1), 128), list_of_SoN, 'bo', markersize=10)
 x = np.arange(0, 128*(len(list_of_SoN)+1))
 mpl.plot(x, 11.7*x**(1/2), 'b--')
 # mpl.errorbar(np.arange(128, 128*(len(list_of_SoN)+1), 128), list_of_SoN, 'o', yerr =error_SoN)
-mpl.xlabel("""Nombre de mesures moyennées""")      # titre des abscisses
+mpl.xlabel("""Nombre de mesures moyennées (n)""")      # titre des abscisses
 mpl.ylabel('Ratio signal sur bruit') 
 #mpl.text(2000, 15, """La numérisation d'un signal carré a été faite sur un oscilloscope qui moyennait le signal 128 fois. Les différents plateaux du signal numérisé ont été additionés entre eux avec Python pour diminuer le bruit encore plus. Le ratio du point le plus à gauche a été calculé avec un plateau et chaque point est calculé avec un plateau de plus que celui à sa gauche.""")
 props = dict(boxstyle='round', facecolor='grey', alpha=0.5)
-textstr = """Un curve fit des données moyennées a été fait pour une
-courbe y(n) = 11.7 * n^0.5."""
+textstr = """y(n) = 11.7 * n^0.5."""
 # La numérisation d'un signal carré a été faite sur un
 # oscilloscope qui moyennait le signal 128 fois. Les
 # différents plateaux du signal numérisé ont été
