@@ -113,8 +113,8 @@ def Malus(theta, I_0, delta_theta):
 # Courbe de tendance avec décalage
 parametres, covariance = scipy.optimize.curve_fit(Malus, Angle, Courant, p0=[100, 0])  # p0=[100, 0] est un point de départ pour les paramètres
 print(parametres)
-
-mpl.plot(Angle, Courant, "o", label='Données')  # Plot Données
+mpl.rcParams.update({'font.size': 24})
+mpl.plot(Angle, Courant, "bo", markersize=10, label='Données')  # Plot Données
 mpl.plot(Angle, Malus(Angle, *parametres), color='red', label='Courbe de tendance')  # Plot courbe de tendance
 mpl.xlabel("Angle du prisme de Glan-Thompson (°)")  # titre des abscisses
 mpl.ylabel("Courant proportionnel à l'intensité lumineuse (μA)")  # titre des ordonnées
