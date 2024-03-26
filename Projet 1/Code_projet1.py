@@ -12,6 +12,8 @@ for i in data:
     Signal_capté.append(i[1])
     Signal_transmis.append(i[2])
 
+Temps = np.array(Temps) + Temps[len(Temps)-1]
+
 
 # Normalisation des signaux
 Capté_norm = Signal_capté / np.max(np.abs(Signal_capté))
@@ -22,7 +24,7 @@ Capté_norm_centré = Capté_norm - np.mean(Capté_norm)
 Transmis_norm_centré = Transmis_norm - np.mean(Transmis_norm)
 
 # FFT du signal transmis
-fft_transmis = np.fft.fft(Transmis_norm_centré)
+fft_transmis = np.fft.fftshift(Transmis_norm_centré)
 freq_transmis = np.fft.fftfreq(len(Transmis_norm_centré), d=Temps[1]-Temps[0])
 
 index_transmis = 0
@@ -33,7 +35,7 @@ for i, b in enumerate(freq_transmis):
 
 
 # FFT du signal capté
-fft_capté = np.fft.fft(Capté_norm_centré)
+fft_capté = np.fft.fftshift(Capté_norm_centré)
 freq_capté = np.fft.fftfreq(len(Capté_norm_centré), d=Temps[1]-Temps[0])
 
 index_capté = 0
@@ -50,22 +52,23 @@ fft_capté_norm = np.abs(fft_capté) / np.max(np.abs(fft_capté))
 plt.figure(figsize=(10, 6))
 
 plt.subplot(2, 1, 1)
-plt.plot(Temps, Transmis_norm_centré, label='Signal transmis')
+plt.plot(Temps, Transmis_norm_centré, label='Signal source')
 plt.plot(Temps, Capté_norm_centré, label='Signal capté')
-plt.title('Signal temporel normalisé')
-plt.ylabel('Amplitude')
-plt.legend()
+plt.title('Signal temporel normalisé', fontsize=16)
+plt.xlabel('Temps (s)', fontsize=14)
+plt.ylabel('Amplitude', fontsize=14)
+plt.legend(loc = 'upper right', fontsize=12)
 
 plt.subplot(2, 1, 2)
-plt.plot(freq_transmis[0: index_transmis], fft_transmis_norm[0:index_transmis], label='FFT du signal transmis')
-plt.plot(freq_capté[0: index_capté], fft_capté_norm[0:index_capté], label='FFT du signal capté')
-plt.title('Spectre en fréquence normalisé')
-plt.xlabel('Fréquence (Hz)')
-plt.ylabel('Amplitude')
-plt.legend(loc='upper left')
+plt.plot(freq_transmis, fft_transmis_norm, label='FFT du signal source')
+plt.plot(freq_capté, fft_capté_norm, label='FFT du signal capté')
+plt.title('Spectre en fréquence normalisé', fontsize=16)
+plt.xlabel('Fréquence (Hz)', fontsize=14)
+plt.ylabel('Amplitude', fontsize=14)
+plt.legend(fontsize=12)
 
 plt.tight_layout()
 
 plt.show()
 
-print(freq_transmis)
+print(Temps)
