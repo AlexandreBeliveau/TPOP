@@ -13,18 +13,19 @@ for couple in data1:
     Position.append(couple[0])
     Intensité.append(couple[1])
 
-def sinc(x, A, B, C):
-    x_array = np.array(x)
-    return A * np.sin(np.pi * B * x_array) / (np.pi * B * x_array) + C
-
+def sinc(x, I_0, a, l):
+    x_array = np.array(x)-4.2
+    return I_0 * np.sinc(np.pi* a * x_array/l)**2
+test = sinc(Position, 100000000, 0.4, 0.000065)
 # Courbe de tendance
 #parametres, covariance = scipy.optimize.curve_fit(sinc, Position, Intensité) 
 #print(parametres)
 
 mpl.plot(Position, Intensité, label = 'Données', color = 'blue')
-#mpl.plot(Position, sinc(Position, *parametres), color='red', label='Courbe de tendance') 
+#mpl.plot(Position, sinc(Position, *parametres), color='red', label='Courbe de tendance')
+mpl.plot() 
 mpl.xlabel("Position [cm]")      # titre des abscisses
-mpl.ylabel("Gray Value [-]")      # titre des ordonnées
+mpl.ylabel("Valeur de gris [-]")      # titre des ordonnées
 #mpl.legend()
 mpl.show()
 

@@ -23,6 +23,6 @@ def sinc(x, A, B, C):
 mpl.plot(Position, Intensité, label = 'Données', color = 'blue')
 #mpl.plot(Position, sinc(Position, *parametres), color='red', label='Courbe de tendance') 
 mpl.xlabel("Position [cm]")      # titre des abscisses
-mpl.ylabel("Gray Value [-]")      # titre des ordonnées
+mpl.ylabel("Valeur de gris [-]")      # titre des ordonnées
 #mpl.legend()
 mpl.show()

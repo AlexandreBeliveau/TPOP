@@ -14,7 +14,7 @@ w_image = lmbda*f/np.pi/w_objectif
 t = (2*w_image*a/(w_image**2+a**2))**2
 plt.rcParams.update({'font.size': 24})
 plt.plot(z, t, 'bo', markersize=10)
-plt.xlabel = 'distance laser/lentille (Z)'
-plt.ylabel = 'efficacité d’injection (T)'
+plt.xlabel('Distance laser/lentille (Z)')
+plt.ylabel('Efficacité d’injection (T)')
 plt.show()
 print(a)
