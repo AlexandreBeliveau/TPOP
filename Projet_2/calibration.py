@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-import glob
+import os
 
 # Define the size of the checkerboard pattern
 pattern_size = (6, 9)  # Change according to your calibration target
@@ -14,14 +14,16 @@ objpoints = []  # 3d points in real world space
 imgpoints = []  # 2d points in image plane.
 
 # Images directory
-images_dir = 'calibration_images/*.jpg'  # Change this to your directory of calibration images
+images_dir = 'images_calibration'  # Change this to your directory of calibration images
 
 # Get list of calibration images
-images = glob.glob(images_dir)
-
+cwd = os.getcwd()+'/Projet_2/'+images_dir
+images = os.listdir(cwd)
+print(images)
 # Loop through each calibration image
 for fname in images:
-    img = cv2.imread(fname)
+    img = cv2.imread(cwd + '/' +fname)
+    cv2.imshow('Image', img)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Find the chessboard corners
