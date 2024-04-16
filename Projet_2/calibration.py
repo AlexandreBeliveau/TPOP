@@ -104,7 +104,7 @@ mtxD, distD, objpointsD, imgpointsD, shapeD = calib_1camera('imgD')
 mtxG, distG, objpointsG, imgpointsG, shapeG = calib_1camera('imgG')
 
 if objpointsD == objpointsG and shapeD == shapeG:
-    calibrate_stereocamera(objpointsG, imgpointsG, imgpointsD, mtxG, distG, mtxD, distD, shapeG)
+    R, T = calibrate_stereocamera(objpointsG, imgpointsG, imgpointsD, mtxG, distG, mtxD, distD, shapeG)
 
 RT1 = np.concatenate([np.eye(3), [[0],[0],[0]]], axis = -1)
 P1 = mtxG @ RT1 #projection matrix for C1
@@ -112,5 +112,3 @@ P1 = mtxG @ RT1 #projection matrix for C1
 #RT matrix for C2 is the R and T obtained from stereo calibration.
 RT2 = np.concatenate([R, T], axis = -1)
 P2 = mtxD @ RT2 #projection matrix for C2
-
-
