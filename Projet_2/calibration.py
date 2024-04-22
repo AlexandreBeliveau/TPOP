@@ -21,6 +21,7 @@ def calib_1camera(camera):
     # Get list of calibration images
     cwd = os.getcwd()+'/Projet_2/'+images_dir+camera
     images = os.listdir(cwd)
+    images.sort()
     print(images)
 
     img = cv2.imread(cwd + '/' +images[0])
@@ -49,12 +50,12 @@ def calib_1camera(camera):
     cv2.destroyAllWindows()
 
     # Calibration
-    ret, mtx, dist, rvecs, tvecs, shape= cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+    ret, mtx, dist, rvecs, tvecs= cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
     # Print calibration results
     print("Camera Matrix:\n", mtx)
     print("\nDistortion Coefficients:\n", dist)
-    return mtx, dist, objpoints, imgpoints
+    return mtx, dist, objpoints, imgpoints, shape
 
 
 def read_imgfile(camera):
@@ -78,37 +79,19 @@ def calibrate_stereocamera(objpoints, imgpoints1, imgpoints2, mtx1, dist1, mtx2,
     return R, T
 
 
-def DLT(P1, P2, point1, point2):
- 
-    A = [point1[1]*P1[2,:] - P1[1,:],
-         P1[0,:] - point1[0]*P1[2,:],
-         point2[1]*P2[2,:] - P2[1,:],
-         P2[0,:] - point2[0]*P2[2,:]
-        ]
-    A = np.array(A).reshape((4,4))
-    #print('A: ')
-    #print(A)
- 
-    B = A.transpose() @ A
-    from scipy import linalg
-    U, s, Vh = linalg.svd(B, full_matrices = False)
- 
-    print('Triangulated point: ')
-    print(Vh[3,0:3]/Vh[3,3])
-    return Vh[3,0:3]/Vh[3,3]
-
-
-
-
 mtxD, distD, objpointsD, imgpointsD, shapeD = calib_1camera('imgD')
 mtxG, distG, objpointsG, imgpointsG, shapeG = calib_1camera('imgG')
 
-if objpointsD == objpointsG and shapeD == shapeG:
+if np.array_equal(objpointsD, objpointsG) and shapeD == shapeG:
     R, T = calibrate_stereocamera(objpointsG, imgpointsG, imgpointsD, mtxG, distG, mtxD, distD, shapeG)
+    # Write calibration parameters to a text file
+    with open('calibration_parameters.txt', 'w') as file:
+        file.write('Camera Matrix mtxG:\n')
+        np.savetxt(file, mtxG, delimiter=',')
+        file.write('\n\nCamera Matrix mtxD:\n')
+        np.savetxt(file, mtxD, delimiter=',')
+        file.write('\n\nRotation Matrix R:\n')
+        np.savetxt(file, R, delimiter=',')
+        file.write('\n\nTranslation Vector T:\n')
+        np.savetxt(file, T, delimiter=',')
 
-RT1 = np.concatenate([np.eye(3), [[0],[0],[0]]], axis = -1)
-P1 = mtxG @ RT1 #projection matrix for C1
- 
-#RT matrix for C2 is the R and T obtained from stereo calibration.
-RT2 = np.concatenate([R, T], axis = -1)
-P2 = mtxD @ RT2 #projection matrix for C2
