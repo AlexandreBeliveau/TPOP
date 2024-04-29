@@ -112,10 +112,10 @@ err = []
 for i in range(len(pos_calc)):
     err.append(abs(pos_calc[i] - pos_reel[i]))
 
-plt.rcParams.update({'font.size': 24})
-plt.plot(pos_reel[1:], err[1:], 'bo', markersize=10)
+plt.rcParams.update({'font.size': 28})
+plt.plot(pos_reel[1:], err[1:], 'bo', markersize=13)
 plt.yscale('log')
-plt.xlabel('Position réelle (cm)')
+plt.xlabel('Distance de référence (cm)')
 plt.ylabel('Erreur (cm)')
 plt.grid()
 plt.show()
